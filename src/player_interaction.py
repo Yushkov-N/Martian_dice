@@ -12,7 +12,6 @@ class Action(enum.StrEnum):
     CHOOSE_HUMAN = 'choose_human'
     CHOOSE_COW = 'choose_cow'
     CHOOSE_CHICKEN = 'choose_chicken'
-
     ROLL = 'roll'
     REROLL = 'reroll'
     END_GAME_MOVE = 'end game move'
