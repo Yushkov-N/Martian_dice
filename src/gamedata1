@@ -1,0 +1,15 @@
+{
+    "current_player_index": 0,
+    "players": [
+        {
+            "name": "Bob",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "Henry",
+            "score": 0,
+            "kind": "Bot"
+        }
+    ]
+}
