@@ -5,7 +5,6 @@ from src.player_interaction import Action
 
 
 class Human(PlayerInteraction):
-
     @classmethod
     def choose_roll(cls):
         while True:
