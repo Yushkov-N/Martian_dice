@@ -5,26 +5,21 @@ from src.player import Player
 class GameState:
 
     def __init__(self, players: list[Player], current_player: int = 0, current_round=1,
-                 remaining_dice: list = [Dice.VALUES[0]]*13, chosen_dice: list = list()):
+                 remaining_dice: list = [Dice.VALUES[0]] * 13, chosen_dice: list = list()):
         self.players: list[Player] = players
+        self.end_play_players = list()
         self.current_player_index: int = current_player
         self.remaining_dice = remaining_dice
         self.chosen_dice = chosen_dice
         self.current_round = current_round
         self.last_round = False
+        self.several_winner = False
 
     def __repr__(self):
         return f"""
             [ Game_state ]:
                 "current_player_index": {self.current_player_index}, 
                 "players": {[p for p in self.players]}"""
-
-    def current_player(self) -> Player:
-        try:
-            return self.players[self.current_player_index]
-        except:
-            self.current_player_index = 0
-            return self.players[self.current_player_index]
 
     def __eq__(self, other):
         return self.players == other.players and self.current_player_index == other.current_player_index
@@ -41,6 +36,13 @@ class GameState:
         return cls(
             players=players,
             current_player=int(data['current_player_index']))
+
+    def current_player(self) -> Player:
+        try:
+            return self.players[self.current_player_index]
+        except:
+            self.current_player_index = 0
+            return self.players[self.current_player_index]
 
     def next_player(self):
         n = len(self.players)
@@ -60,6 +62,7 @@ class GameState:
 
     def choose_dice(self, dice: Dice):
         self.chosen_dice.append(dice)
+        self.remaining_dice.remove(dice)
 
     def add_score(self):
         self.players[self.current_player_index].add_score(self.chosen_dice)
@@ -70,7 +73,10 @@ class GameState:
         self.chosen_dice.clear()
 
     def score(self):
-        return {p.name: p.scoree() for p in self.players}
+        if self.players:
+            return {p.name: p.player_score() for p in self.players}
+        else:
+            return {p.name: p.player_score() for p in self.end_play_players}
 
     @staticmethod
     def draw_dice(dice_rem: list, dice_chs: list = None):
