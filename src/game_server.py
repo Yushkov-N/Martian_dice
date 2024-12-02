@@ -22,6 +22,7 @@ class GamePhase(enum.StrEnum):
     NEXT_ROUND = "Round"
     LAST_ROUND = "Last_round"
     GAME_END = "Game_ended"
+    UNDECIDED_WINNER = 'winner_selection'
 
 
 class GameServer:
@@ -34,8 +35,8 @@ class GameServer:
 
     @classmethod
     def load_game(cls, filename: str | pb.Path):
-        with open(filename, 'r') as fin:
-            data = json.load(fin)
+        with open(filename, 'r') as f:
+            data = json.load(f)
             game_state = GameState.load(data)
             print(game_state)
             player_types = {}
@@ -44,33 +45,6 @@ class GameServer:
                 kind = getattr(all_player_types, kind)
                 player_types[player.name] = kind
             return GameServer(player_types=player_types, game_state=game_state)
-
-    # @classmethod
-    # def load_game(cls, filename: str | pb.Path):
-    # Загрузка игры с запросом типов игроков, если были изменения типов в файле gamedata
-    #     with open(filename, 'r') as fin:
-    #         player_types = {}
-    #         data = json.load(fin)
-    #         game_state = GameState.load(data)
-    #         player_types_str = ''
-    #         for name, cls in inspect.getmembers(all_player_types):
-    #             if inspect.isclass(cls) and issubclass(cls, PlayerInteraction):
-    #                 player_types_str += str(cls.__name__) + ' '
-    #         player_types_str = '( '+player_types_str+')'
-    #         for player, player_data in zip(game_state.players, data['players']):
-    #             kind = player_data['kind']
-    #             try:
-    #                 kind = getattr(all_player_types, kind)
-    #             except:
-    #                 while True:
-    #                     kind = input(f'Введите тип для {player.name} {player_types_str} - ')
-    #                     try:
-    #                         kind = getattr(all_player_types, kind)
-    #                         break
-    #                     except: None
-    #             player_types[player.name] = kind
-    #         print(game_state)
-    #         return GameServer(player_types=player_types, game_state=game_state)
 
     def save(self, filename: str | pb.Path):
         data = self.save_to_dict()
@@ -116,6 +90,7 @@ class GameServer:
                 GamePhase.NEXT_ROUND: self.next_round_phase,
                 GamePhase.LAST_ROUND: self.last_round_phase,
                 GamePhase.DECLARE_WINNER: self.declare_winner_phase,
+                GamePhase.UNDECIDED_WINNER: self.decide_winner_phase,
                 GamePhase.GAME_END: self.end_game_phase
             }
             if current_phase == GamePhase.NEXT_ROUND and not self.game_state.last_round:
@@ -143,9 +118,12 @@ class GameServer:
                 return GamePhase.ROLL
 
     def reroll_dice_phase(self):
-        self.game_state.draw_dice(self.game_state.remaining_dice, self.game_state.chosen_dice)
+
+        if not self.game_state.several_winner:
+            self.game_state.draw_dice(self.game_state.remaining_dice, self.game_state.chosen_dice)
         current_player = self.game_state.current_player()
         player_type = self.player_types[current_player.name]
+
         if self.game_state.remaining_dice:
             match player_type.choose_continue():
                 case Action.REROLL:
@@ -154,10 +132,16 @@ class GameServer:
                     self.game_state.reroll_dice()
                     self.game_state.draw_dice(self.game_state.remaining_dice, self.game_state.chosen_dice)
 
-                    if Dice.RAY in self.game_state.remaining_dice:
-                        return GamePhase.CHOOSE
+                    if self.game_state.several_winner:
+                        for _ in range(self.game_state.remaining_dice.count(Dice.RAY)):
+                            current_player.score += 1
+                        if self.game_state.current_player_index != len(self.game_state.players)-1:
+                            return GamePhase.GAME_MOVE_END
+                        else:
+                            return GamePhase.DECLARE_WINNER
+
                     for dice in self.game_state.remaining_dice:
-                        if dice not in self.game_state.chosen_dice:
+                        if dice not in self.game_state.chosen_dice or dice == Dice.RAY:
                             return GamePhase.CHOOSE
                     return GamePhase.GAME_MOVE_END
 
@@ -179,7 +163,6 @@ class GameServer:
                 player_type.inform_player_choose_ray(current_player)
                 for _ in range(self.game_state.remaining_dice.count(Dice.RAY)):
                     self.game_state.choose_dice(Dice.RAY)
-                    self.game_state.remaining_dice.remove(Dice.RAY)
                 if not self.game_state.remaining_dice:
                     return GamePhase.GAME_MOVE_END
                 return GamePhase.REROLL
@@ -188,7 +171,6 @@ class GameServer:
                 player_type.inform_player_choose_human(current_player)
                 for _ in range(self.game_state.remaining_dice.count(Dice.HUMAN)):
                     self.game_state.choose_dice(Dice.HUMAN)
-                    self.game_state.remaining_dice.remove(Dice.HUMAN)
                 if not self.game_state.remaining_dice:
                     return GamePhase.GAME_MOVE_END
                 return GamePhase.REROLL
@@ -197,7 +179,6 @@ class GameServer:
                 player_type.inform_player_choose_cow(current_player)
                 for _ in range(self.game_state.remaining_dice.count(Dice.COW)):
                     self.game_state.choose_dice(Dice.COW)
-                    self.game_state.remaining_dice.remove(Dice.COW)
                 if not self.game_state.remaining_dice:
                     return GamePhase.GAME_MOVE_END
                 return GamePhase.REROLL
@@ -206,7 +187,6 @@ class GameServer:
                 player_type.inform_player_choose_chicken(current_player)
                 for _ in range(self.game_state.remaining_dice.count(Dice.CHICKEN)):
                     self.game_state.choose_dice(Dice.CHICKEN)
-                    self.game_state.remaining_dice.remove(Dice.CHICKEN)
                 if not self.game_state.remaining_dice:
                     return GamePhase.GAME_MOVE_END
                 return GamePhase.REROLL
@@ -219,6 +199,11 @@ class GameServer:
         self.game_state.add_score()
         self.game_state.return_dice()
         print(self.game_state)
+
+        if self.game_state.several_winner:
+            if self.game_state.current_player_index != len(self.game_state.players)-1:
+                self.game_state.next_player()
+                return GamePhase.REROLL
 
         if self.game_state.players[self.game_state.current_player_index].score >= 25:
             if self.game_state.current_player_index == len(self.game_state.players)-1:
@@ -253,12 +238,41 @@ class GameServer:
             return GamePhase.DECLARE_WINNER
 
     def declare_winner_phase(self) -> GamePhase:
+
         score = self.game_state.score()
         all_score = [val for val in score.values()]
         max_score = max(all_score)
+
         if all_score.count(max_score) >= 2:
+
+            for p in self.game_state.players:
+                if p.score != max_score:
+                    self.game_state.end_play_players.append(p)
+            for p in self.game_state.end_play_players:
+                if p in self.game_state.players:
+                    self.game_state.players.remove(p)
+
+            self.game_state.several_winner = True
             self.game_state.last_round = False
-            return GamePhase.REROLL
+
+            if self.game_state.players:
+                return GamePhase.UNDECIDED_WINNER
+
+        else:
+            while self.game_state.players:
+                self.game_state.end_play_players.append(self.game_state.players.pop())
+
+            # for p in self.game_state.players:
+            #     self.game_state.end_play_players.append(p)
+            # for p in self.game_state.end_play_players:
+            #     self.game_state.players.remove(p)
+            #
+            # if self.game_state.several_winner:
+            #     if self.game_state.current_player_index == len(self.game_state.players)-1:
+            #         for _ in range(len(self.game_state.players)):
+            #             self.game_state.end_play_players.append(self.game_state.players.pop())
+
+        score = self.game_state.score()
 
         player = max(score, key=lambda k: score[k])
         print(' Score:')
@@ -268,6 +282,13 @@ class GameServer:
         print(f"""      {player}: {score[player]} points""")
         return GamePhase.GAME_END
 
+    def decide_winner_phase(self):
+        self.game_state.current_player_index = 0
+        self.game_state.remaining_dice.clear()
+        for _ in range(6):
+            self.game_state.remaining_dice.append(Dice.RAY)
+        return GamePhase.REROLL
+
     def end_game_phase(self):
         return GamePhase.GAME_END
 
@@ -276,11 +297,11 @@ class GameServer:
         while True:
             try:
                 player_count = int(input("How many players? - "))
-                if 2 <= player_count <= 5:
+                if 2 <= player_count <= 100:
                     return player_count
             except ValueError:
                 pass
-            print("Please input a number between 2 and 5")
+            print("Please input a number between 2 and 100")
 
     @staticmethod
     def request_player() -> (str, PlayerInteraction):
