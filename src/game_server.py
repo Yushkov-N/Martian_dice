@@ -231,8 +231,8 @@ class GameServer:
 
     def last_round_phase(self):
         self.game_state.last_round = True
-        if self.game_state.current_player_index == 0:
-            self.game_state.next_player()
+        self.game_state.next_player()
+        if self.game_state.current_player_index != 0 and self.game_state.last_round:
             return GamePhase.ROLL
         else:
             return GamePhase.DECLARE_WINNER
@@ -261,16 +261,6 @@ class GameServer:
         else:
             while self.game_state.players:
                 self.game_state.end_play_players.append(self.game_state.players.pop())
-
-            # for p in self.game_state.players:
-            #     self.game_state.end_play_players.append(p)
-            # for p in self.game_state.end_play_players:
-            #     self.game_state.players.remove(p)
-            #
-            # if self.game_state.several_winner:
-            #     if self.game_state.current_player_index == len(self.game_state.players)-1:
-            #         for _ in range(len(self.game_state.players)):
-            #             self.game_state.end_play_players.append(self.game_state.players.pop())
 
         score = self.game_state.score()
 
