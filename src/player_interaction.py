@@ -22,7 +22,9 @@ class PlayerInteraction(ABC):
     @classmethod
     @abstractmethod
     def choose_action(cls) -> Dice:
-        'Игрок выбирает отложить кубик или бросить кубик, или закончить ход'
+        """
+        Игрок выбирает отложить кубик или бросить кубик, или закончить ход
+        """
         pass
 
     @classmethod
