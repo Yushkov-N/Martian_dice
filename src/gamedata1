@@ -2,12 +2,22 @@
     "current_player_index": 0,
     "players": [
         {
-            "name": "Bob",
+            "name": "Ballu",
             "score": 0,
             "kind": "Bot"
         },
         {
-            "name": "Henry",
+            "name": "Rebecca",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "Lui",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "Kit",
             "score": 0,
             "kind": "Bot"
         }
