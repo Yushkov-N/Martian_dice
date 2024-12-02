@@ -9,12 +9,11 @@ class Human(PlayerInteraction):
     def choose_roll(cls):
         while True:
             action = input('Choose action: ')
-            match  action:
+            match action:
                 case 'r':
-                    cls.inform_dice_is_roll()
                     return Action.ROLL
                 case _:
-                     print("""   Please type:
+                    print("""   Please type:
         "r" for roll dice(s) """)
 
     @classmethod
@@ -23,10 +22,8 @@ class Human(PlayerInteraction):
             action = input('Choose action: ')
             match action:
                 case 're':
-                    cls.inform_dice_is_reroll()
                     return Action.REROLL
                 case 'e':
-                    cls.inform_end_game_move()
                     return Action.END_GAME_MOVE
                 case _:
                     print("""Please type: 
@@ -41,7 +38,6 @@ class Human(PlayerInteraction):
             match action:
                 case 'ray':
                     if Dice.RAY in remaining_dice:
-                        # cls.inform_player_choose_ray()
                         return Action.CHOOSE_RAY
                     else:
                         print('Ray not in remaining dice')
@@ -49,7 +45,6 @@ class Human(PlayerInteraction):
                 case 'cow':
                     if Dice.COW in remaining_dice:
                         if Dice.COW not in chosen_dice:
-                            # cls.inform_player_choose_cow()
                             return Action.CHOOSE_COW
                         else:
                             print('Cow already in chosen dice')
@@ -59,7 +54,6 @@ class Human(PlayerInteraction):
                 case 'human':
                     if Dice.HUMAN in remaining_dice:
                         if Dice.HUMAN not in chosen_dice:
-                            # cls.inform_player_choose_human()
                             return Action.CHOOSE_HUMAN
                         else:
                             print('Human already in chosen dice')
@@ -69,7 +63,6 @@ class Human(PlayerInteraction):
                 case 'chick':
                     if Dice.CHICKEN in remaining_dice:
                         if Dice.CHICKEN not in chosen_dice:
-                            # cls.inform_player_choose_chicken()
                             return Action.CHOOSE_CHICKEN
                         else:
                             print('Chicken already in chosen dice')
