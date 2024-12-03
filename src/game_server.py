@@ -20,9 +20,9 @@ class GamePhase(enum.StrEnum):
     DECLARE_WINNER = "Declare a winner"
     GAME_MOVE_END = "Game_move_end"
     NEXT_ROUND = "Round"
-    LAST_ROUND = "Last_round"
-    GAME_END = "Game_ended"
-    UNDECIDED_WINNER = 'winner_selection'
+    LAST_ROUND = "Last round"
+    GAME_END = "Game ended"
+    UNDECIDED_WINNER = 'Winner selection'
 
 
 class GameServer:
@@ -97,7 +97,7 @@ class GameServer:
                 print('________', current_phase, self.game_state.current_round, '________')
 
             if current_phase != GamePhase.NEXT_ROUND:
-                print('\n[', current_phase, 'phase ]')
+                print('\n[', current_phase, 'phase ]\n')
             current_phase = phases[current_phase]()
 
     def roll_dice_phase(self) -> GamePhase:
@@ -119,39 +119,36 @@ class GameServer:
 
     def reroll_dice_phase(self):
 
-        if not self.game_state.several_winner:
-            self.game_state.draw_dice(self.game_state.remaining_dice, self.game_state.chosen_dice)
         current_player = self.game_state.current_player()
         player_type = self.player_types[current_player.name]
 
-        if self.game_state.remaining_dice:
-            match player_type.choose_continue():
-                case Action.REROLL:
+        if not self.game_state.several_winner:
+            self.game_state.draw_dice(self.game_state.remaining_dice, self.game_state.chosen_dice)
 
-                    player_type.inform_dice_is_reroll(current_player)
-                    self.game_state.reroll_dice()
-                    self.game_state.draw_dice(self.game_state.remaining_dice, self.game_state.chosen_dice)
+        match player_type.choose_continue():
+            case Action.REROLL:
 
-                    if self.game_state.several_winner:
-                        for _ in range(self.game_state.remaining_dice.count(Dice.RAY)):
-                            current_player.score += 1
-                        if self.game_state.current_player_index != len(self.game_state.players)-1:
-                            return GamePhase.GAME_MOVE_END
-                        else:
-                            return GamePhase.DECLARE_WINNER
+                player_type.inform_dice_is_reroll(current_player)
+                self.game_state.reroll_dice()
+                self.game_state.draw_dice(self.game_state.remaining_dice, self.game_state.chosen_dice)
 
-                    for dice in self.game_state.remaining_dice:
-                        if dice not in self.game_state.chosen_dice or dice == Dice.RAY:
-                            return GamePhase.CHOOSE
-                    return GamePhase.GAME_MOVE_END
+                if self.game_state.several_winner:
+                    current_player.score += self.game_state.remaining_dice.count(Dice.RAY)
+                    if self.game_state.current_player_index != len(self.game_state.players)-1:
+                        return GamePhase.GAME_MOVE_END
+                    return GamePhase.DECLARE_WINNER
 
-                case Action.END_GAME_MOVE:
-                    player_type.inform_end_game_move(current_player)
-                    return GamePhase.GAME_MOVE_END
-                case _:
-                    return GamePhase.REROLL
-        else:
-            return GamePhase.GAME_MOVE_END
+                for dice in self.game_state.remaining_dice:
+                    if dice not in self.game_state.chosen_dice or dice == Dice.RAY:
+                        return GamePhase.CHOOSE
+                return GamePhase.GAME_MOVE_END
+
+            case Action.END_GAME_MOVE:
+                player_type.inform_end_game_move(current_player)
+                return GamePhase.GAME_MOVE_END
+
+            case _:
+                return GamePhase.REROLL
 
     def chose_dice_phase(self):
         current_player = self.game_state.current_player()
@@ -161,38 +158,38 @@ class GameServer:
 
             case Action.CHOOSE_RAY:
                 player_type.inform_player_choose_ray(current_player)
-                for _ in range(self.game_state.remaining_dice.count(Dice.RAY)):
-                    self.game_state.choose_dice(Dice.RAY)
-                if not self.game_state.remaining_dice:
-                    return GamePhase.GAME_MOVE_END
-                return GamePhase.REROLL
+                while Dice.RAY in self.game_state.remaining_dice:
+                    for dice in self.game_state.remaining_dice:
+                        if dice == Dice.RAY:
+                            self.game_state.choose_dice(dice)
 
             case Action.CHOOSE_HUMAN:
                 player_type.inform_player_choose_human(current_player)
-                for _ in range(self.game_state.remaining_dice.count(Dice.HUMAN)):
-                    self.game_state.choose_dice(Dice.HUMAN)
-                if not self.game_state.remaining_dice:
-                    return GamePhase.GAME_MOVE_END
-                return GamePhase.REROLL
+                while Dice.HUMAN in self.game_state.remaining_dice:
+                    for dice in self.game_state.remaining_dice:
+                        if dice == Dice.HUMAN:
+                            self.game_state.choose_dice(dice)
 
             case Action.CHOOSE_COW:
                 player_type.inform_player_choose_cow(current_player)
-                for _ in range(self.game_state.remaining_dice.count(Dice.COW)):
-                    self.game_state.choose_dice(Dice.COW)
-                if not self.game_state.remaining_dice:
-                    return GamePhase.GAME_MOVE_END
-                return GamePhase.REROLL
+                while Dice.COW in self.game_state.remaining_dice:
+                    for dice in self.game_state.remaining_dice:
+                        if dice == Dice.COW:
+                            self.game_state.choose_dice(dice)
 
             case Action.CHOOSE_CHICKEN:
                 player_type.inform_player_choose_chicken(current_player)
-                for _ in range(self.game_state.remaining_dice.count(Dice.CHICKEN)):
-                    self.game_state.choose_dice(Dice.CHICKEN)
-                if not self.game_state.remaining_dice:
-                    return GamePhase.GAME_MOVE_END
-                return GamePhase.REROLL
+                while Dice.CHICKEN in self.game_state.remaining_dice:
+                    for dice in self.game_state.remaining_dice:
+                        if dice == Dice.CHICKEN:
+                            self.game_state.choose_dice(dice)
 
             case _:
                 return GamePhase.CHOOSE
+
+        if not self.game_state.remaining_dice:
+            return GamePhase.GAME_MOVE_END
+        return GamePhase.REROLL
 
     def end_game_move_phase(self):
 
@@ -200,26 +197,22 @@ class GameServer:
         self.game_state.return_dice()
         print(self.game_state)
 
-        if self.game_state.several_winner:
-            if self.game_state.current_player_index != len(self.game_state.players)-1:
-                self.game_state.next_player()
-                return GamePhase.REROLL
+        if (self.game_state.several_winner and
+                self.game_state.current_player_index != len(self.game_state.players)-1):
+            self.game_state.next_player()
+            return GamePhase.REROLL
 
         if self.game_state.players[self.game_state.current_player_index].score >= 25:
             if self.game_state.current_player_index == len(self.game_state.players)-1:
                 return GamePhase.DECLARE_WINNER
-            else:
-                self.game_state.return_dice()
-                return GamePhase.LAST_ROUND
+            self.game_state.return_dice()
+            return GamePhase.LAST_ROUND
+
         else:
             self.game_state.next_player()
-
-            if self.game_state.current_player_index == 0:
-
-                self.game_state.return_dice()
-                return GamePhase.NEXT_ROUND
-
             self.game_state.return_dice()
+            if self.game_state.current_player_index == 0:
+                return GamePhase.NEXT_ROUND
             return GamePhase.ROLL
 
     def next_round_phase(self):
@@ -244,7 +237,6 @@ class GameServer:
         max_score = max(all_score)
 
         if all_score.count(max_score) >= 2:
-
             for p in self.game_state.players:
                 if p.score != max_score:
                     self.game_state.end_play_players.append(p)
@@ -252,19 +244,15 @@ class GameServer:
                 if p in self.game_state.players:
                     self.game_state.players.remove(p)
 
-            self.game_state.several_winner = True
-            self.game_state.last_round = False
-
-            if self.game_state.players:
-                return GamePhase.UNDECIDED_WINNER
+            return GamePhase.UNDECIDED_WINNER
 
         else:
-            while self.game_state.players:
-                self.game_state.end_play_players.append(self.game_state.players.pop())
+            self.game_state.end_play_players.extend(self.game_state.players)
+            self.game_state.players.clear()
 
         score = self.game_state.score()
-
         player = max(score, key=lambda k: score[k])
+
         print(' Score:')
         for key in score:
             print(f"""      {key}: {score[key]} points""")
@@ -273,10 +261,12 @@ class GameServer:
         return GamePhase.GAME_END
 
     def decide_winner_phase(self):
+        self.game_state.several_winner = True
+        self.game_state.last_round = False
         self.game_state.current_player_index = 0
-        self.game_state.remaining_dice.clear()
-        for _ in range(6):
-            self.game_state.remaining_dice.append(Dice.RAY)
+        self.game_state.return_dice()
+        while len(self.game_state.remaining_dice) != 6:
+            self.game_state.remaining_dice.pop()
         return GamePhase.REROLL
 
     def end_game_phase(self):
@@ -290,8 +280,7 @@ class GameServer:
                 if 2 <= player_count <= 100:
                     return player_count
             except ValueError:
-                pass
-            print("Please input a number between 2 and 100")
+                print("Please input a number between 2 and 100")
 
     @staticmethod
     def request_player() -> (str, PlayerInteraction):
