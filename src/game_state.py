@@ -5,21 +5,28 @@ from src.player import Player
 class GameState:
 
     def __init__(self, players: list[Player], current_player: int = 0, current_round=1,
-                 remaining_dice: list = [Dice.VALUES[0]] * 13, chosen_dice: list = list()):
+                 dice: list = [Dice()], chosen_dice: list = list()):
         self.players: list[Player] = players
         self.end_play_players = list()
         self.current_player_index: int = current_player
-        self.remaining_dice = remaining_dice
+        self.remaining_dice = dice * 13
         self.chosen_dice = chosen_dice
         self.current_round = current_round
         self.last_round = False
         self.several_winner = False
 
     def __repr__(self):
-        return f"""
-            [ Game_state ]:
-                "current_player_index": {self.current_player_index}, 
-                "players": {[p for p in self.players]}"""
+        if not self.end_play_players:
+            return f"""
+                [ Game_state ]:
+                    "current_player_index": {self.current_player_index}, 
+                    "players": {[p for p in self.players]}"""
+        else:
+            return f"""
+               [ Game_state ]:
+                   "current_player_index": {self.current_player_index}, 
+                   "players": {[p for p in self.players]}, 
+                   "end_game_players": {[p for p in self.end_play_players]} """
 
     def __eq__(self, other):
         return self.players == other.players and self.current_player_index == other.current_player_index
@@ -49,18 +56,18 @@ class GameState:
         self.current_player_index = (self.current_player_index + 1) % n
 
     def roll_dice(self):
-        self.remaining_dice = Dice.roll(len(self.remaining_dice))
-        for _ in range(self.remaining_dice.count(Dice.TANK)):
-            self.chosen_dice.append(Dice.TANK)
-            self.remaining_dice.remove(Dice.TANK)
+        for i in range(len(self.remaining_dice)):
+            self.remaining_dice[i] = self.remaining_dice[i].roll()
+        while Dice.TANK in self.remaining_dice:
+            for d in self.remaining_dice:
+                if d == Dice.TANK:
+                    self.chosen_dice.append(d)
+                    self.remaining_dice.remove(d)
 
     def reroll_dice(self):
-        self.remaining_dice = Dice.roll(len(self.remaining_dice))
-        for _ in range(self.remaining_dice.count(Dice.TANK)):
-            self.chosen_dice.append(Dice.TANK)
-            self.remaining_dice.remove(Dice.TANK)
+        self.roll_dice()
 
-    def choose_dice(self, dice: Dice):
+    def choose_dice(self, dice):
         self.chosen_dice.append(dice)
         self.remaining_dice.remove(dice)
 
@@ -81,25 +88,16 @@ class GameState:
     @staticmethod
     def draw_dice(dice_rem: list, dice_chs: list = None):
 
-        print('\nTank dice(s) : ', end='')
-        for dice in dice_chs:
-            if dice == Dice.TANK:
-                print('|', dice, '|', sep='', end=' ')
-        print(end='\n')
+        tank = [d for d in dice_chs if d == Dice.TANK]
+        ray = [d for d in dice_chs if d == Dice.RAY]
+        ch = [d for d in dice_chs if d != Dice.RAY and d != Dice.TANK]
+        rem = [d for d in dice_rem]
 
+        print('Tank dice(s) : ', end='')
+        print(*tank)
         print('Chosen ray dice(s) : ', end='')
-        for dice in dice_chs:
-            if dice == Dice.RAY:
-                print('|', dice, '|', sep='', end=' ')
-        print(end='\n')
-
+        print(*ray)
         print('Chosen dice(s) : ', end='')
-        for dice in dice_chs:
-            if dice != Dice.TANK and dice != Dice.RAY:
-                print('|', dice, '|', sep='', end=' ')
-        print(end='\n')
-
+        print(*ch)
         print('Remaining dice(s) : ', end='')
-        for dice in dice_rem:
-            print('|', dice, '|', sep='', end=' ')
-        print(end='\n')
+        print(*rem)
