@@ -79,3 +79,106 @@
 игрок с наибольшим количеством очков. В случае ничьей игроки, набравшее максимальное одинаковое 
 число очков, бросают по 6 кубиков каждый, и побеждает игрок, выкинувший наибольшее количество 
 лучей смерти, в случае новой неопределенности этап с лучами смерти повторяется!
+
+# Пример текстового интерфеса
+```
+________ Round 1 ________
+
+[ Roll dices phase ]
+
+current player: Ballu
+
+Ballu(Bot): roll dice
+Tank dice(s) : 
+Chosen ray dice(s) : 
+Chosen dice(s) : 
+Remaining dice(s) : |ray| |human| |human| |chicken| |chicken| |human| |ray| |ray| |ray| |human| |chicken| |human| |ray|
+
+[ Choose dice phase ]
+
+
+Ballu(Bot): choose chicken
+
+[ Reroll dice(s) phase ]
+
+Tank dice(s) : 
+Chosen ray dice(s) : 
+Chosen dice(s) : |chicken| |chicken| |chicken|
+Remaining dice(s) : |ray| |human| |human| |human| |ray| |ray| |ray| |human| |human| |ray|
+
+Ballu(Bot): reroll dice(s)
+Tank dice(s) : |tank| |tank| |tank|
+Chosen ray dice(s) : 
+Chosen dice(s) : |chicken| |chicken| |chicken|
+Remaining dice(s) : |ray| |cow| |cow| |cow| |human| |human| |human|
+
+[ Choose dice phase ]
+
+
+Ballu(Bot): choose human
+
+[ Reroll dice(s) phase ]
+
+Tank dice(s) : |tank| |tank| |tank|
+Chosen ray dice(s) : 
+Chosen dice(s) : |chicken| |chicken| |chicken| |human| |human| |human|
+Remaining dice(s) : |ray| |cow| |cow| |cow|
+
+Ballu(Bot): end game move
+
+[ Game_move_end phase ]
+
+
+                [ Game_state ]:
+                    "current_player_index": 0, 
+                    "players": [Ballu: 0, Rebecca: 0, Lui: 0, Kit: 0]
+
+*                                                                           *
+* ------------------------------------------------------------------------- *
+*                                                                           *
+
+[ Game_move_end phase ]
+
+
+                [ Game_state ]:
+                    "current_player_index": 3, 
+                    "players": [Ballu: 11, Rebecca: 21, Lui: 25, Kit: 22]
+
+[ Declare a winner phase ]
+
+ Score:
+      Ballu: 11 points
+      Rebecca: 21 points
+      Lui: 25 points
+      Kit: 22 points
+ Winner:
+      Lui: 25 points
+```
+# Пример файла сохранения
+```
+{
+    "current_player_index": 0,
+    "players": [
+        {
+            "name": "Ballu",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "Rebecca",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "Lui",
+            "score": 0,
+            "kind": "Bot"
+        },
+        {
+            "name": "Kit",
+            "score": 0,
+            "kind": "Bot"
+        }
+    ]
+}
+```
