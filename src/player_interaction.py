@@ -1,6 +1,5 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
-from src.dice import Dice
 from src.player import Player
 import enum
 
@@ -18,14 +17,6 @@ class Action(enum.StrEnum):
 
 
 class PlayerInteraction(ABC):
-
-    @classmethod
-    @abstractmethod
-    def choose_action(cls) -> Dice:
-        """
-        Игрок выбирает отложить кубик или бросить кубик, или закончить ход
-        """
-        pass
 
     @classmethod
     def inform_player_choose_ray(cls, player: Player):
