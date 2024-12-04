@@ -26,7 +26,7 @@ class GameState:
                [ Game_state ]:
                    "current_player_index": {self.current_player_index}, 
                    "players": {[p for p in self.players]}, 
-                   "end_game_players": {[p for p in self.end_play_players]} """
+                   "end_game_players": {[p for p in self.end_play_players]}"""
 
     def __eq__(self, other):
         return self.players == other.players and self.current_player_index == other.current_player_index
@@ -93,7 +93,7 @@ class GameState:
         ch = [d for d in dice_chs if d != Dice.RAY and d != Dice.TANK]
         rem = [d for d in dice_rem]
 
-        print('Tank dice(s) : ', end='')
+        print('\nTank dice(s) : ', end='')
         print(*tank)
         print('Chosen ray dice(s) : ', end='')
         print(*ray)
