@@ -80,7 +80,7 @@ class GameServer:
         return res
 
     def run(self):
-        current_phase = GamePhase.ROLL
+        current_phase = GamePhase.NEXT_ROUND
         while current_phase != GamePhase.GAME_END:
             phases = {
                 GamePhase.ROLL: self.roll_dice_phase,
@@ -97,7 +97,7 @@ class GameServer:
                 print('________', current_phase, self.game_state.current_round, '________')
 
             if current_phase != GamePhase.NEXT_ROUND:
-                print('\n[', current_phase, 'phase ]\n')
+                print('\n[', current_phase, 'phase ]')
             current_phase = phases[current_phase]()
 
     def roll_dice_phase(self) -> GamePhase:
@@ -125,7 +125,7 @@ class GameServer:
         if not self.game_state.several_winner:
             self.game_state.draw_dice(self.game_state.remaining_dice, self.game_state.chosen_dice)
 
-        match player_type.choose_continue():
+        match player_type.choose_continue(self.game_state.remaining_dice, self.game_state.chosen_dice):
             case Action.REROLL:
 
                 player_type.inform_dice_is_reroll(current_player)
@@ -253,7 +253,7 @@ class GameServer:
         score = self.game_state.score()
         player = max(score, key=lambda k: score[k])
 
-        print(' Score:')
+        print(' \nScore:')
         for key in score:
             print(f"""      {key}: {score[key]} points""")
         print(' Winner:')
