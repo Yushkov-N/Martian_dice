@@ -17,7 +17,7 @@ class Bot(PlayerInteraction, ABC):
         return Action.ROLL
 
     @classmethod
-    def choose_continue(cls):
+    def choose_continue(cls,remaining_dice: list = None, chosen_dice: list = None):
         action = random.choice(cls.action_continue)
         return action
 
