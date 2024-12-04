@@ -80,79 +80,111 @@
 число очков, бросают по 6 кубиков каждый, и побеждает игрок, выкинувший наибольшее количество 
 лучей смерти, в случае новой неопределенности этап с лучами смерти повторяется!
 
-# Пример текстового интерфеса
+# Пример текстового интерфейса
 ```
-________ Round 1 ________
-
-[ Roll dices phase ]
-
-current player: Ballu
-
-Ballu(Bot): roll dice
-Tank dice(s) : 
-Chosen ray dice(s) : 
-Chosen dice(s) : 
-Remaining dice(s) : |ray| |human| |human| |chicken| |chicken| |human| |ray| |ray| |ray| |human| |chicken| |human| |ray|
-
-[ Choose dice phase ]
-
-
-Ballu(Bot): choose chicken
-
-[ Reroll dice(s) phase ]
-
-Tank dice(s) : 
-Chosen ray dice(s) : 
-Chosen dice(s) : |chicken| |chicken| |chicken|
-Remaining dice(s) : |ray| |human| |human| |human| |ray| |ray| |ray| |human| |human| |ray|
-
-Ballu(Bot): reroll dice(s)
-Tank dice(s) : |tank| |tank| |tank|
-Chosen ray dice(s) : 
-Chosen dice(s) : |chicken| |chicken| |chicken|
-Remaining dice(s) : |ray| |cow| |cow| |cow| |human| |human| |human|
-
-[ Choose dice phase ]
-
-
-Ballu(Bot): choose human
-
-[ Reroll dice(s) phase ]
-
-Tank dice(s) : |tank| |tank| |tank|
-Chosen ray dice(s) : 
-Chosen dice(s) : |chicken| |chicken| |chicken| |human| |human| |human|
-Remaining dice(s) : |ray| |cow| |cow| |cow|
-
-Ballu(Bot): end game move
-
-[ Game_move_end phase ]
-
-
                 [ Game_state ]:
                     "current_player_index": 0, 
                     "players": [Ballu: 0, Rebecca: 0, Lui: 0, Kit: 0]
+________ Round 1 ________
+
+[ Roll dices phase ]
+current player: Ballu
+
+Ballu(Bot): roll dice
+
+Tank dice(s) : |tank| |tank| |tank|
+Chosen ray dice(s) : 
+Chosen dice(s) : 
+Remaining dice(s) : |ray| |cow| |ray| |ray| |cow| |ray| |chicken| |human| |human| |cow|
+
+[ Choose dice phase ]
+
+Ballu(Bot): choose ray
+
+[ Reroll dice(s) phase ]
+
+Tank dice(s) : |tank| |tank| |tank|
+Chosen ray dice(s) : |ray| |ray| |ray| |ray|
+Chosen dice(s) : 
+Remaining dice(s) : |cow| |cow| |chicken| |human| |human| |cow|
+
+Ballu(Bot): reroll dice(s)
+
+Tank dice(s) : |tank| |tank| |tank|
+Chosen ray dice(s) : |ray| |ray| |ray| |ray|
+Chosen dice(s) : 
+Remaining dice(s) : |cow| |cow| |human| |chicken| |ray| |ray|
+
+[ Choose dice phase ]
+
+Ballu(Bot): choose cow
+
+[ Reroll dice(s) phase ]
+
+Tank dice(s) : |tank| |tank| |tank|
+Chosen ray dice(s) : |ray| |ray| |ray| |ray|
+Chosen dice(s) : |cow| |cow|
+Remaining dice(s) : |human| |chicken| |ray| |ray|
+
+Ballu(Bot): reroll dice(s)
+
+Tank dice(s) : |tank| |tank| |tank|
+Chosen ray dice(s) : |ray| |ray| |ray| |ray|
+Chosen dice(s) : |cow| |cow|
+Remaining dice(s) : |ray| |ray| |ray| |ray|
+
+[ Choose dice phase ]
+
+Ballu(Bot): choose ray
+
+[ Game_move_end phase ]
+
+                [ Game_state ]:
+                    "current_player_index": 0, 
+                    "players": [Ballu: 2, Rebecca: 0, Lui: 0, Kit: 0]
 
 *                                                                           *
 * ------------------------------------------------------------------------- *
 *                                                                           *
 
-[ Game_move_end phase ]
+[ Roll dices phase ]
+current player: Kit
 
+Kit(Bot): roll dice
+
+Tank dice(s) : |tank| |tank| |tank| |tank|
+Chosen ray dice(s) : 
+Chosen dice(s) : 
+Remaining dice(s) : |ray| |human| |cow| |ray| |ray| |human| |chicken| |ray| |cow|
+
+[ Choose dice phase ]
+
+Kit(Bot): choose human
+
+[ Reroll dice(s) phase ]
+
+Tank dice(s) : |tank| |tank| |tank| |tank|
+Chosen ray dice(s) : 
+Chosen dice(s) : |human| |human|
+Remaining dice(s) : |ray| |cow| |ray| |ray| |chicken| |ray| |cow|
+
+Kit(Bot): end game move
+
+[ Game_move_end phase ]
 
                 [ Game_state ]:
                     "current_player_index": 3, 
-                    "players": [Ballu: 11, Rebecca: 21, Lui: 25, Kit: 22]
+                    "players": [Ballu: 18, Rebecca: 28, Lui: 14, Kit: 11]
 
 [ Declare a winner phase ]
-
- Score:
-      Ballu: 11 points
-      Rebecca: 21 points
-      Lui: 25 points
-      Kit: 22 points
+ 
+Score:
+      Ballu: 18 points
+      Rebecca: 28 points
+      Lui: 14 points
+      Kit: 11 points
  Winner:
-      Lui: 25 points
+      Rebecca: 28 points
 ```
 # Пример файла сохранения
 ```
